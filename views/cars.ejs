@@ -1,0 +1,27 @@
+<% include partials/header %>
+ <div clas="container">
+    <header class="jumbotron">
+        <div class="container">
+            <h1>Welcome to BMW blog!</h1>
+            <p>You can post here photos of BMW</p>
+            <p>
+                <a class="btn btn-primary btn-large" href="/cars/new">Add new photo</a>
+            </p>
+        </div>
+    </header>
+
+    <div class="row text-center" style="display:flex; flex-wrap: wrap;">
+        <% cars.forEach(car=>{ %>
+            <div class="col-md-3 col-sm-6">
+                <div class="thumbnail">
+                    <img src="<%= car.image %>">
+                    <div class="caption">
+                        <h4><%= car.name %></h4>
+                    </div>
+                </div>
+            </div>
+        <%}); %>
+    </div>
+ </div>
+
+<% include partials/footer %>
