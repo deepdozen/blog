@@ -1,3 +1,6 @@
+#remove image with previous build (latest)
+docker rmi 3c49c3038887
+
 #build image from current dockerfile
 
 docker build -t node-10/node-web-app .
