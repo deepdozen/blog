@@ -5,9 +5,12 @@ docker rmi 3c49c3038887
 
 docker build -t node-10/node-web-app .
 
-#create new docker container and remove it after it stops
+#create new docker container connect it to the same mongo use network and remove container after it stops
 
-docker run --rm -p 49160:8080 -d node-10/node-web-app
+docker run --rm --net=48cfa89ca1a3 -p 49160:8080 -d node-10/node-web-app
+
+#same as above + nodejs console
+docker run --rm --net=48cfa89ca1a3 -p 49160:8080 node-10/node-web-app
 
 #goto npm console
 
@@ -19,4 +22,4 @@ root@b0cb7562f40b:/usr/src/app# curl -i localhost:8080
 
 #from host terminal check http get request
 
-MacBook-Pro:run deepdozen$ curl -i localhost:49160
+hostMachine$ curl -i localhost:49160
