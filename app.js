@@ -3,6 +3,8 @@ var app = express();
 //body-parser extract the entire body portion of an incoming request stream and exposes it on req.body.
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
+var Blog = require("./models/car");
+var seedDB = require("./seeds");
 
 // Constants
 const PORT = 8080;
@@ -23,41 +25,32 @@ mongoose.connect("mongodb://172.19.0.2:27017/cars_blog", { useNewUrlParser: true
     console.log("mongoDB connected!");
   }
 });
+seedDB();
 
 // SCHEMA SETUP
-var blogSchema = new mongoose.Schema({
-  name: String,
-  image: String,
-  description: String
-});
+// var blogSchema = new mongoose.Schema({
+//   name: String,
+//   image: String,
+//   description: String
+// });
 
-//data
-// var cars = [
-//   {name: "bmw-m3-cs-2018", image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-cs-2018-free-wallpaper_1-800x600.jpg"},
-//   {name: "bmw-m3-concept-2007", image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-concept-2-2007-best-wallpaper_1-800x600.jpeg"},
-//   {name: "bmw-m3-cs-2018", image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-cars-cute-wallpaper_1-800x600.jpg"},
-//   {name: "bmw-m3-bt92-by-alpha-n-performance-2013", image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-bt92-by-alpha-n-performance-2013-cool_1-800x600.jpeg"},
-//   {name: "bmw-m3-30-years-american-edition", image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-30-years-american-edition-4k-2018-cool-hd_1-800x600.jpeg"},
-//   {name: "bmw-m3-30-jahre-special-edition", image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-30-jahre-special-edition-2016-cute_1-800x600.jpeg"}
-// ]; 
+// var Blog = mongoose.model("Blog", blogSchema);
 
-var Blog = mongoose.model("Blog", blogSchema);
+// Blog.create(
+//      {
+//          name: "bmw-m3-cs-2018", 
+//          image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-cs-2018-free-wallpaper_1-800x600.jpg",
+//          description: "This is a BMW M3 2018"
 
-Blog.create(
-     {
-         name: "bmw-m3-cs-2018", 
-         image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-cs-2018-free-wallpaper_1-800x600.jpg",
-         description: "This is a BMW M3 2018"
-
-     },
-     (err, newpost)=>{
-      if(err){
-          console.log(err);
-      } else {
-          console.log("NEWLY CREATED POST: ");
-        console.log(newpost);
-      }
-    });
+//      },
+//      (err, newpost)=>{
+//       if(err){
+//           console.log(err);
+//       } else {
+//           console.log("NEWLY CREATED POST: ");
+//         console.log(newpost);
+//       }
+//     });
 
 // App root
 app.get('/', (req, res) => {
@@ -104,10 +97,11 @@ app.get("/cars/new", (req, res) => {
 // SHOW - shows more info about one record
 app.get("/cars/:id", (req, res) => {
   //find the record with provided ID
-  Blog.findById(req.params.id, (err, foundCar)=>{
+  Blog.findById(req.params.id).populate("comments").exec((err, foundCar)=>{
     if (err) {
       console.log(err);
     } else {
+      console.log(foundCar)
       //render show template with that campground
       res.render("show", { car: foundCar });
     }
