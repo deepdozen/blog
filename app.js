@@ -4,6 +4,7 @@ var app = express();
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var Blog = require("./models/car");
+var Comment = require("./models/comment");
 var seedDB = require("./seeds");
 
 // Constants
@@ -27,31 +28,6 @@ mongoose.connect("mongodb://172.19.0.2:27017/cars_blog", { useNewUrlParser: true
 });
 seedDB();
 
-// SCHEMA SETUP
-// var blogSchema = new mongoose.Schema({
-//   name: String,
-//   image: String,
-//   description: String
-// });
-
-// var Blog = mongoose.model("Blog", blogSchema);
-
-// Blog.create(
-//      {
-//          name: "bmw-m3-cs-2018", 
-//          image: "https://wallpaper4rest.com/cars/wallpaper/bmw-m3-cs-2018-free-wallpaper_1-800x600.jpg",
-//          description: "This is a BMW M3 2018"
-
-//      },
-//      (err, newpost)=>{
-//       if(err){
-//           console.log(err);
-//       } else {
-//           console.log("NEWLY CREATED POST: ");
-//         console.log(newpost);
-//       }
-//     });
-
 // App root
 app.get('/', (req, res) => {
     res.render("landing");
@@ -65,7 +41,7 @@ app.get('/cars', (req, res) => {
       if (err) {
         console.log(err);
       } else {
-        res.render("index", { cars: allCars });
+        res.render("cars/index", { cars: allCars });
       }
     });
 });
@@ -91,7 +67,7 @@ app.post("/cars", (req, res) => {
 
 //NEW - show form to create a new record
 app.get("/cars/new", (req, res) => {
-    res.render("new.ejs");
+    res.render("cars/new.ejs");
 });
 
 // SHOW - shows more info about one record
@@ -103,10 +79,46 @@ app.get("/cars/:id", (req, res) => {
     } else {
       console.log(foundCar)
       //render show template with that campground
-      res.render("show", { car: foundCar });
+      res.render("cars/show", { car: foundCar });
     }
   });
 })
+
+// ====================
+// COMMENTS ROUTES
+// ====================
+
+app.get("/cars/:id/comments/new",(req,res)=>{
+  Blog.findById(req.params.id,(err,car)=>{
+    if(err){
+      console.log(err);
+    }else{
+      res.render("comments/new",{car: car});
+    }
+  })
+});
+
+//create new comment
+//connect new comment to car
+//redirect to show page
+app.post("/cars/:id/comments",(req,res)=>{
+  Blog.findById(req.params.id, (err, car) => {
+    if (err) {
+      console.log(err);
+      res.redirect("/cars");
+    } else {
+      Comment.create(req.body.comment,(err,comment)=>{
+        if(err){
+          console.log(err);
+        }else{
+          car.comments.push(comment);
+          car.save();
+          res.redirect("/cars/" + car._id);
+        }
+      });
+    }
+  });
+});
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
