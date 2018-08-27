@@ -10,7 +10,7 @@ docker build -t node-10/node-web-app .
 docker run --rm --net=48cfa89ca1a3 -p 49160:8080 -d node-10/node-web-app
 
 #same as above + nodejs console
-docker run --rm --net=48cfa89ca1a3 -p 49160:8080 node-10/node-web-app
+docker run --rm --net=f839fdeb7604 -p 49160:8080 node-10/node-web-app
 
 #goto npm console
 
