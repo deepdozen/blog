@@ -6,6 +6,9 @@ var mongoose = require("mongoose");
 var Blog = require("./models/car");
 var Comment = require("./models/comment");
 var seedDB = require("./seeds");
+var passport = require("passport");
+var LocalStrategy = require("passport-local");
+var User = require("./models/user");
 
 // Constants
 const PORT = 8080;
@@ -17,9 +20,11 @@ app.use(bodyParser.urlencoded({extended: true}));
 //At runtime, the template engine replaces variables in a template file with actual values, 
 //and transforms the template into an HTML file sent to the client
 app.set("view engine", "ejs");
+// serve static files for express
+app.use(express.static(__dirname + "/public"));
 
 //connect to the mongoDB container
-mongoose.connect("mongodb://172.19.0.2:27017/cars_blog", { useNewUrlParser: true },err=>{
+mongoose.connect("mongodb://172.17.0.3:27017/cars_blog", { useNewUrlParser: true },err=>{
   if(err){
     console.log("error. mongoDB not connected");
   }else{
@@ -27,6 +32,25 @@ mongoose.connect("mongodb://172.19.0.2:27017/cars_blog", { useNewUrlParser: true
   }
 });
 seedDB();
+
+// PASSPORT CONFIGURATION
+app.use(require("express-session")({
+  secret: "Secret frase which is used for hash generating",
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+app.use((req,res,next)=>{
+  res.locals.currentUser = req.user;
+  next();
+});
+
 
 // App root
 app.get('/', (req, res) => {
@@ -88,7 +112,7 @@ app.get("/cars/:id", (req, res) => {
 // COMMENTS ROUTES
 // ====================
 
-app.get("/cars/:id/comments/new",(req,res)=>{
+app.get("/cars/:id/comments/new", isLoggedIn,(req,res)=>{
   Blog.findById(req.params.id,(err,car)=>{
     if(err){
       console.log(err);
@@ -101,7 +125,7 @@ app.get("/cars/:id/comments/new",(req,res)=>{
 //create new comment
 //connect new comment to car
 //redirect to show page
-app.post("/cars/:id/comments",(req,res)=>{
+app.post("/cars/:id/comments", isLoggedIn,(req,res)=>{
   Blog.findById(req.params.id, (err, car) => {
     if (err) {
       console.log(err);
@@ -119,6 +143,54 @@ app.post("/cars/:id/comments",(req,res)=>{
     }
   });
 });
+
+// ====================
+// AUTH ROUTES
+// ====================
+
+// show register form
+app.get("/register",(req,res)=>{
+  res.render("register");
+});
+
+//sign up logic
+app.post("/register",(req, res)=>{
+  var newUser = new User({username: req.body.username});
+  User.register(newUser, req.body.password, (err,user)=>{
+    if(err){
+      console.log(err);
+      return res.render("register");
+    }
+    passport.authenticate("local")(req,res, ()=>{
+      res.redirect("/cars");
+    });
+  });
+});
+
+//show login form
+app.get("/login",(req,res)=>{
+  res.render("login");
+});
+
+//login logic
+app.post("/login",passport.authenticate("local",{
+    successRedirect: "/cars",
+    failureRedirect: "/login"
+  }), (req,res)=>{}
+);
+
+//logout logic
+app.get("/logout", (req,res)=>{
+  req.logout();
+  res.redirect("/cars");
+});
+
+function isLoggedIn(req,res,next){
+  if(req.isAuthenticated()){
+    return next();
+  }
+  res.redirect("/login");
+}
 
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);

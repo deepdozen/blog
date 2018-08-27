@@ -11,6 +11,10 @@
     "express": "^4.16.1",
     "ejs": "*",
     "body-parser": "*",
-    "mongoose": "*"
+    "mongoose": "*",
+    "express-session": "*",
+    "passport": "*",
+    "passport-local": "*",
+    "passport-local-mongoose": "*"
   }
 }
