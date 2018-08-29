@@ -3,8 +3,8 @@ var app = express();
 //body-parser extract the entire body portion of an incoming request stream and exposes it on req.body.
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
-var Blog = require("./models/car");
-var Comment = require("./models/comment");
+// var Blog = require("./models/car");
+// var Comment = require("./models/comment");
 var seedDB = require("./seeds");
 var passport = require("passport");
 var LocalStrategy = require("passport-local");
