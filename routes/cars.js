@@ -16,12 +16,16 @@ router.get('/', (req, res) => {
 });
 
 //CREATE - Create a new record and save to DB
-router.post("/", (req, res) => {
+router.post("/", isLoggedIn, (req, res) => {
     // get data from form and add to cars array
     var name = req.body.name;
     var image = req.body.image;
     var desc = req.body.description;
-    var newCar = { name: name, image: image, description: desc }
+    var author = {
+        id: req.user._id,
+        username: req.user.username
+    }
+    var newCar = { name: name, image: image, description: desc, author:author }
     //cars.push(newCar);
     //Create a new record and save to DB
     Blog.create(newCar, (err, newlyCreated) => {
@@ -35,7 +39,7 @@ router.post("/", (req, res) => {
 });
 
 //NEW - show form to create a new record
-router.get("/new", (req, res) => {
+router.get("/new", isLoggedIn, (req, res) => {
     res.render("cars/new.ejs");
 });
 
@@ -52,5 +56,12 @@ router.get("/:id", (req, res) => {
         }
     });
 })
+
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect("/login");
+}
 
 module.exports = router;
