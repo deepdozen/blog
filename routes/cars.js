@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var Blog = require("../models/car");
+var middleware = require("../middleware");
 
 //INDEX - show all records
 router.get('/', (req, res) => {
@@ -16,7 +17,7 @@ router.get('/', (req, res) => {
 });
 
 //CREATE - Create a new record and save to DB
-router.post("/", isLoggedIn, (req, res) => {
+router.post("/", middleware.isLoggedIn, (req, res) => {
     // get data from form and add to cars array
     var name = req.body.name;
     var image = req.body.image;
@@ -39,7 +40,7 @@ router.post("/", isLoggedIn, (req, res) => {
 });
 
 //NEW - show form to create a new record
-router.get("/new", isLoggedIn, (req, res) => {
+router.get("/new", middleware.isLoggedIn, (req, res) => {
     res.render("cars/new.ejs");
 });
 
@@ -51,17 +52,39 @@ router.get("/:id", (req, res) => {
             console.log(err);
         } else {
             console.log(foundCar)
-            //render show template with that campground
+            //render show template with that post
             res.render("cars/show", { car: foundCar });
         }
     });
 })
 
-function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect("/login");
-}
+//EDIT ROUTE
+router.get("/:id/edit", middleware.checkPostOwnership, (req,res)=>{
+    Blog.findById(req.params.id, (err,foundCar)=>{
+        res.render("cars/edit",{car: foundCar});
+    });
+});
+
+//UPDATE ROUTE
+router.put("/:id",middleware.checkPostOwnership, (req,res)=>{
+    Blog.findByIdAndUpdate(req.params.id, req.body.car, (err,updateCar)=>{
+        if(err){
+            res.redirect("/cars");
+        } else {
+            res.redirect("/cars/"+req.params.id);
+        }
+    });
+});
+
+//DELETE ROUTE
+router.delete("/:id",middleware.checkPostOwnership,(req,res)=>{
+    Blog.findByIdAndRemove(req.params.id, (err)=>{
+        if(err){
+            res.redirect("/cars");
+        } else {
+            res.redirect("/cars");
+        }
+    })
+})
 
 module.exports = router;

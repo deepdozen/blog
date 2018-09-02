@@ -3,12 +3,11 @@ var app = express();
 //body-parser extract the entire body portion of an incoming request stream and exposes it on req.body.
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
-// var Blog = require("./models/car");
-// var Comment = require("./models/comment");
-var seedDB = require("./seeds");
+//var seedDB = require("./seeds");
 var passport = require("passport");
 var LocalStrategy = require("passport-local");
 var User = require("./models/user");
+var methodOverride = require("method-override");
 //routes vars
 var commentRoutes = require("./routes/comments");
 var carRoutes = require("./routes/cars");
@@ -26,6 +25,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 // serve static files for express
 app.use(express.static(__dirname + "/public"));
+app.use(methodOverride("_method"));
 
 //connect to the mongoDB container
 mongoose.connect("mongodb://172.17.0.3:27017/cars_blog", { useNewUrlParser: true },err=>{
