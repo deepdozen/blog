@@ -48,8 +48,10 @@ router.get("/new", middleware.isLoggedIn, (req, res) => {
 router.get("/:id", (req, res) => {
     //find the record with provided ID
     Blog.findById(req.params.id).populate("comments").exec((err, foundCar) => {
-        if (err) {
+        if (err || !foundCar) {
             console.log(err);
+            req.flash('error', 'Sorry, that post does not exist!');
+            res.redirect("/cars");
         } else {
             console.log(foundCar)
             //render show template with that post
@@ -59,10 +61,11 @@ router.get("/:id", (req, res) => {
 })
 
 //EDIT ROUTE
-router.get("/:id/edit", middleware.checkPostOwnership, (req,res)=>{
-    Blog.findById(req.params.id, (err,foundCar)=>{
-        res.render("cars/edit",{car: foundCar});
-    });
+router.get("/:id/edit", middleware.isLoggedIn, middleware.checkPostOwnership, (req,res)=>{
+    // Blog.findById(req.params.id, (err,foundCar)=>{
+    //     res.render("cars/edit",{car: foundCar});
+    // });
+    res.render("cars/edit", { car: req.car });
 });
 
 //UPDATE ROUTE
@@ -71,6 +74,7 @@ router.put("/:id",middleware.checkPostOwnership, (req,res)=>{
         if(err){
             res.redirect("/cars");
         } else {
+            req.flash("success", "Post successfully updated");
             res.redirect("/cars/"+req.params.id);
         }
     });
@@ -82,6 +86,7 @@ router.delete("/:id",middleware.checkPostOwnership,(req,res)=>{
         if(err){
             res.redirect("/cars");
         } else {
+            req.flash("success", "Post successfully deleted");
             res.redirect("/cars");
         }
     })

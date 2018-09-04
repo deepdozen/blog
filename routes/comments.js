@@ -26,6 +26,7 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
         } else {
             Comment.create(req.body.comment, (err, comment) => {
                 if (err) {
+                    req.flash("error","Something went wrong");
                     console.log(err);
                 } else {
                     //add username and id to comment
@@ -34,6 +35,7 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
                     comment.save();
                     car.comments.push(comment);
                     car.save();
+                    req.flash("success", "Successfuly added comment");
                     res.redirect("/cars/" + car._id);
                 }
             });
@@ -58,6 +60,7 @@ router.put("/:comment_id", middleware.checkCommentOwnership, (req,res)=>{
         if(err){
             res.redirect("back");
         } else {
+            req.flash("success", "Comment successfully updated");
             res.redirect("/cars/" + req.params.id);
         }
     });
@@ -69,6 +72,7 @@ router.delete("/:comment_id", middleware.checkCommentOwnership, (req,res)=>{
         if(err){
             res.redirect("back");
         } else {
+            req.flash("success","Comment deleted");
             res.redirect("/cars/" + req.params.id);
         }
     });
