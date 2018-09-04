@@ -20,13 +20,14 @@ router.get('/', (req, res) => {
 router.post("/", middleware.isLoggedIn, (req, res) => {
     // get data from form and add to cars array
     var name = req.body.name;
+    var price = req.body.price;
     var image = req.body.image;
     var desc = req.body.description;
     var author = {
         id: req.user._id,
         username: req.user.username
     }
-    var newCar = { name: name, image: image, description: desc, author:author }
+    var newCar = { name: name, price: price, image: image, description: desc, author:author }
     //cars.push(newCar);
     //Create a new record and save to DB
     Blog.create(newCar, (err, newlyCreated) => {
@@ -62,10 +63,9 @@ router.get("/:id", (req, res) => {
 
 //EDIT ROUTE
 router.get("/:id/edit", middleware.isLoggedIn, middleware.checkPostOwnership, (req,res)=>{
-    // Blog.findById(req.params.id, (err,foundCar)=>{
-    //     res.render("cars/edit",{car: foundCar});
-    // });
-    res.render("cars/edit", { car: req.car });
+    Blog.findById(req.params.id, (err,foundCar)=>{
+        res.render("cars/edit",{car: foundCar});
+    });
 });
 
 //UPDATE ROUTE
