@@ -6,8 +6,10 @@ var mongoose = require("mongoose");
 //var seedDB = require("./seeds");
 var passport = require("passport");
 var LocalStrategy = require("passport-local");
-var User = require("./models/user");
 var methodOverride = require("method-override");
+var flash = require("connect-flash");
+
+var User = require("./models/user");
 //routes vars
 var commentRoutes = require("./routes/comments");
 var carRoutes = require("./routes/cars");
@@ -26,6 +28,7 @@ app.set("view engine", "ejs");
 // serve static files for express
 app.use(express.static(__dirname + "/public"));
 app.use(methodOverride("_method"));
+app.use(flash());
 
 //connect to the mongoDB container
 mongoose.connect("mongodb://172.17.0.3:27017/cars_blog", { useNewUrlParser: true },err=>{
@@ -52,6 +55,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use((req,res,next)=>{
   res.locals.currentUser = req.user;
+  res.locals.error = req.flash("error");
+  res.locals.success = req.flash("success");
   next();
 });
 

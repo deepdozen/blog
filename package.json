@@ -16,6 +16,7 @@
     "passport": "*",
     "passport-local": "*",
     "passport-local-mongoose": "*",
-    "method-override": "*"
+    "method-override": "*",
+    "connect-flash": "*"
   }
 }
