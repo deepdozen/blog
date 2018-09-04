@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            res.render("cars/index", { cars: allCars });
+            res.render("cars/index", { cars: allCars, page: 'cars' });
         }
     });
 });
