@@ -3,6 +3,17 @@ var router = express.Router();
 var Blog = require("../models/car");
 var middleware = require("../middleware");
 
+var NodeGeocoder = require('node-geocoder');
+
+var options = {
+    provider: 'google',
+    httpAdapter: 'https',
+    apiKey: process.env.GEOCODER_API_KEY,
+    formatter: null
+};
+
+var geocoder = NodeGeocoder(options);
+
 //INDEX - show all records
 router.get('/', (req, res) => {
     //res.render("cars",{cars:cars});
@@ -27,16 +38,27 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
         id: req.user._id,
         username: req.user.username
     }
-    var newCar = { name: name, price: price, image: image, description: desc, author:author }
-    //cars.push(newCar);
-    //Create a new record and save to DB
-    Blog.create(newCar, (err, newlyCreated) => {
-        if (err) {
+
+    geocoder.geocode(req.body.location, (err, data)=>{
+        if (err || !data.length) {
             console.log(err);
-        } else {
-            //redirect back to cars page
-            res.redirect("/cars");
+            req.flash('error', 'Invalid address');
+            return res.redirect('back');
         }
+        var lat = data[0].latitude;
+        var lng = data[0].longitude;
+        var location = data[0].formattedAddress;
+        var newCar = { name: name, price: price, image: image, description: desc, author: author, location: location, lat: lat, lng: lng };
+        //cars.push(newCar);
+        //Create a new record and save to DB
+        Blog.create(newCar, (err, newlyCreated) => {
+            if (err) {
+                console.log(err);
+            } else {
+                //redirect back to cars page
+                res.redirect("/cars");
+            }
+        });
     });
 });
 
@@ -70,13 +92,23 @@ router.get("/:id/edit", middleware.isLoggedIn, middleware.checkPostOwnership, (r
 
 //UPDATE ROUTE
 router.put("/:id",middleware.checkPostOwnership, (req,res)=>{
-    Blog.findByIdAndUpdate(req.params.id, req.body.car, (err,updateCar)=>{
-        if(err){
-            res.redirect("/cars");
-        } else {
-            req.flash("success", "Post successfully updated");
-            res.redirect("/cars/"+req.params.id);
+    geocoder.geocode(req.body.location, (err, data)=>{
+        if (err || !data.length) {
+            req.flash('error', 'Invalid address');
+            return res.redirect('back');
         }
+        req.body.car.lat = data[0].latitude;
+        req.body.car.lng = data[0].longitude;
+        req.body.car.location = data[0].formattedAddress;    
+        
+        Blog.findByIdAndUpdate(req.params.id, req.body.car, (err, updateCar) => {
+            if (err) {
+                res.redirect("/cars");
+            } else {
+                req.flash("success", "Post successfully updated");
+                res.redirect("/cars/" + updateCar._id);
+            }
+        });        
     });
 });
 
