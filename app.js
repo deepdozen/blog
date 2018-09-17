@@ -4,6 +4,8 @@ var app = express();
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 //var seedDB = require("./seeds");
+//var moment = require('moment');
+app.locals.moment = require('moment');
 var passport = require("passport");
 var LocalStrategy = require("passport-local");
 var methodOverride = require("method-override");
@@ -29,6 +31,7 @@ app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(methodOverride("_method"));
 app.use(flash());
+
 
 //connect to the mongoDB container
 mongoose.connect("mongodb://172.17.0.3:27017/cars_blog", { useNewUrlParser: true },err=>{

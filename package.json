@@ -18,6 +18,7 @@
     "passport-local-mongoose": "*",
     "method-override": "*",
     "connect-flash": "*",
-    "node-geocoder": "*"
+    "node-geocoder": "*",
+    "moment": "*"
   }
 }

@@ -16,13 +16,16 @@ router.get("/register", (req, res) => {
 //sign up logic
 router.post("/register", (req, res) => {
     var newUser = new User({ username: req.body.username });
+    if(req.body.adminCode === 'SYS'){
+        newUser.isAdmin = true;
+    }
     User.register(newUser, req.body.password, (err, user) => {
         if (err) {
             console.log(err);
             return res.render("register", { error: err.message });
         }
         passport.authenticate("local")(req, res, () => {
-            req.flash("success", "Welcome to Blog " + user.username);
+            req.flash("success", "Welcome to Blog " + user.username + newUser.isAdmin ? " You are entered as an Admin" : "");
             res.redirect("/cars");
         });
     });

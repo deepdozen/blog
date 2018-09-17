@@ -5,7 +5,8 @@ var passportLocalMongoose = require("passport-local-mongoose");
 //Each schema maps to a MongoDB collection and defines the shape of the documents within that collection
 var UserSchema = new mongoose.Schema({
     username: String,
-    password: String
+    password: String,
+    isAdmin: {type: Boolean, default: false}
 });
 
 UserSchema.plugin(passportLocalMongoose);

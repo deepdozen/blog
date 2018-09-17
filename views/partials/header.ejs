@@ -37,9 +37,15 @@
                     </li>
                     <% } else { %>
                         <li>
-                            <a href="#">Signed In As
-                                <%= currentUser.username %>
-                            </a>
+                            <% if(currentUser.isAdmin) { %>
+                                <a href="#">Hello
+                                    <strong><%= currentUser.username %></strong> You are logged in as an Admin
+                                </a>
+                            <% } else { %>
+                                <a href="#">Hello
+                                    <strong><%= currentUser.username %></strong>
+                                </a>
+                            <% } %>    
                         </li>
                         <li>
                             <a href="/logout">Logout</a>
